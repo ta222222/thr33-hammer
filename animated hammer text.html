@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Animated Text</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const loader = new THREE.FontLoader();
+    let textMesh;
+
+    loader.load('https://gist.githubusercontent.com/ta222222/835e194e9edeb6b05daa26a7f869d3cc/raw/437e21980689fac306c263e43bb596e2ca71367d/skrappa.typeface.json', function (font) {
+        const textGeometry = new THREE.TextGeometry('hammer', {
+            font: font,
+            size: 1,
+            height: 0.2,
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        textMesh = new THREE.Mesh(textGeometry, textMaterial);
+        scene.add(textMesh);
+        resetTextPosition(); // Initial position of the text
+    });
+
+    camera.position.z = 5;
+
+    // Random movement speeds for floating
+    const floatSpeed = new THREE.Vector3(
+        (Math.random() - 0.5) * 0.02, 
+        (Math.random() - 0.5) * 0.02, 
+        (Math.random() - 0.5) * 0.02
+    );
+
+    function resetTextPosition() {
+        textMesh.position.x = (Math.random() - 0.5) * 3;
+        textMesh.position.y = (Math.random() - 0.5) * 3;
+        textMesh.position.z = (Math.random() - 0.5) * 3;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Continuously rotate the text
+        if (textMesh) {
+            textMesh.rotation.x += 0.01;
+            textMesh.rotation.y += 0.01;
+
+            // Apply floating effect
+            textMesh.position.add(floatSpeed);
+
+            // If the text moves out of the visible range, reset it to a new random position
+            if (textMesh.position.x > 3 || textMesh.position.x < -3) floatSpeed.x = -floatSpeed.x;
+            if (textMesh.position.y > 3 || textMesh.position.y < -3) floatSpeed.y = -floatSpeed.y;
+            if (textMesh.position.z > 3 || textMesh.position.z < -3) floatSpeed.z = -floatSpeed.z;
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+
+</body>
+</html>
